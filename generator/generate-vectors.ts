@@ -27,11 +27,12 @@ import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
 import { PreparedTransaction } from '@canton-network/core-ledger-proto'
-import { fromBase64, toHex } from '../../wallet/core/tx-hashing/src/bytes.js'
+import { fromBase64 } from '../../wallet/core/tx-hashing/src/bytes.js'
 import {
     computePreparedTransactionHash,
     TxHashingError,
 } from '../../wallet/core/tx-hashing/src/index.js'
+import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/hex.js'
 import { int64sBeyond2To53 } from '../../wallet/core/tx-hashing/src/__tests__/int64.js'
 import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/load-vectors.js'
 import {

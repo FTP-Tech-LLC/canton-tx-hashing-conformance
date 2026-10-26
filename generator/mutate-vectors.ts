@@ -19,11 +19,7 @@ import {
     DamlTransaction_NodeSeed,
     PreparedTransaction,
 } from '@canton-network/core-ledger-proto'
-import {
-    concat,
-    fromBase64,
-    toHex,
-} from '../../wallet/core/tx-hashing/src/bytes.js'
+import { concat, fromBase64 } from '../../wallet/core/tx-hashing/src/bytes.js'
 import {
     computePreparedTransactionHash,
     DEFAULT_LIMITS,
@@ -32,6 +28,7 @@ import {
     type TraversalLimits,
     type TxHashingErrorCode,
 } from '../../wallet/core/tx-hashing/src/index.js'
+import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/hex.js'
 import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/load-vectors.js'
 import {
     changedBytes,
@@ -715,6 +712,12 @@ const REJECTS: Reject[] = [
         oneByte: (b) => `${nodePath(b, '0')}.v1.create.lfVersion`,
     },
     {
+        id: 'reject-v3-transaction-lf-3',
+        from: 'v3-create-with-key',
+        code: 'UNSUPPORTED_LF_VERSION',
+        oneByte: () => 'transaction.version',
+    },
+    {
         id: 'reject-v3-key-in-lf-2-1',
         from: 'v3-create-with-key',
         code: 'UNSUPPORTED_LF_VERSION',
@@ -920,12 +923,12 @@ const REJECTS: Reject[] = [
 
 const base64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64')
 
-/** What the package makes of a vector: its hash in hex, or the code it refuses it with */
+/** What the package makes of a vector: its hash in hex, or its refusal */
 async function outcomeOf(
     preparedTransaction: string,
     scheme: string,
     limits?: Partial<TraversalLimits>
-): Promise<{ hash: string } | { error: TxHashingErrorCode }> {
+): Promise<{ hash: string } | { refusal: TxHashingError }> {
     try {
         const hash = await computePreparedTransactionHash(
             preparedTransaction,
@@ -935,10 +938,13 @@ async function outcomeOf(
         )
         return { hash: toHex(hash) }
     } catch (error) {
-        if (error instanceof TxHashingError) return { error: error.code }
+        if (error instanceof TxHashingError) return { refusal: error }
         throw error
     }
 }
+
+const shown = (refusal: TxHashingError) =>
+    `${refusal.code}${refusal.path === undefined ? '' : ` at ${refusal.path}`}: ${refusal.message}`
 
 async function mutationVector(
     mutation: Mutation,
@@ -948,7 +954,9 @@ async function mutationVector(
     const { bytes, change } = changeOneByte(original, mutation.field(original))
     const preparedTransaction = base64(bytes)
     const outcome = await outcomeOf(preparedTransaction, from.scheme)
-    if (!('hash' in outcome)) throw new Error(`refused: ${outcome.error}`)
+    if (!('hash' in outcome)) {
+        throw new Error(`refused: ${shown(outcome.refusal)}`)
+    }
     if (outcome.hash === from.expected.hash) {
         throw new Error('the change leaves the hash as it was')
     }
@@ -1001,16 +1009,18 @@ async function rejectVector(
     }
     if (change === undefined) throw new Error('the change is not described')
     const outcome = await outcomeOf(preparedTransaction, scheme, limits)
-    if (!('error' in outcome)) throw new Error(`hashed to ${outcome.hash}`)
-    if (outcome.error !== reject.code) {
-        throw new Error(`refused with ${outcome.error}, not ${reject.code}`)
+    if (!('refusal' in outcome)) throw new Error(`hashed to ${outcome.hash}`)
+    if (outcome.refusal.code !== reject.code) {
+        throw new Error(
+            `refused with ${shown(outcome.refusal)}, not ${reject.code}`
+        )
     }
     return {
         id: reject.id,
         kind: 'reject',
         scheme,
         preparedTransaction,
-        expected: { error: outcome.error },
+        expected: { error: outcome.refusal.code },
         ...(limits !== undefined && { limits }),
         source: { from: from.id, mutation: change },
     }

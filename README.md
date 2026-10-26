@@ -2,7 +2,7 @@
 
 Checks the hash vectors of `@canton-network/core-tx-hashing` against two references whose hashing code is written separately from the package:
 
-- the Python hashing example of Canton v3.5.1, unmodified. It decodes with protobuf (upb), which refuses some malformed encodings that protobuf-ts accepts (Decoder leniency in [where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-reference)).
+- the Python hashing example of Canton v3.5.1, unmodified. It decodes with protobuf (upb), which refuses some malformed encodings that protobuf-ts accepts (Decoder leniency in [where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-example)).
 - the published `@canton-network/core-tx-visualizer` 1.9.1, which hashes V2 only. It decodes with `@canton-network/core-ledger-proto` (protobuf-ts), as the package does, so it checks the V2 hashing but not the decoding.
 
 The package and its vectors live in the wallet repository, in `core/tx-hashing/`. These checks and the generators of the vectors live here so that the wallet's CI needs no Python, no protoc, no Canton sources, no old release of the visualizer, no participant and no Daml SDK.
@@ -18,7 +18,7 @@ The Python reference hashes each vector as the example's `interactive_submission
 
 Each script prints one line of counts, `python v2: N/N, v3: M/M, mutation: K/K, held-out: H/H, mismatches: 0` or `visualizer 1.9.1: accepted N/N, mutation K/K, held-out H/H`. If a vector does not give its expected hash, the script prints its id, or its file name, with both hashes or with the error, and exits non-zero. `check-visualizer.ts` also exits non-zero if the installed visualizer is not 1.9.1.
 
-`reject/` is not run. The Python reference does not make the refusals that the reject vectors expect: it hashes most of them ([where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-reference)). The tests of the package in the wallet repository run them.
+`reject/` is not run. The Python reference does not make the refusals that the reject vectors expect: it hashes most of them ([where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-example)). The tests of the package in the wallet repository run them.
 
 ## Running locally
 
@@ -51,7 +51,7 @@ cd generator
 ../../wallet/node_modules/.bin/tsx mutate-vectors.ts
 ```
 
-It fails on a mutation vector that hashes like its accepted vector and on a reject vector that the package hashes or refuses with another code. A run writes nothing if any vector fails, and otherwise replaces `mutation/` and `reject/` as a whole, so the files of a case it no longer has go. The same accepted vectors always give the same files: the `mutation` job of CI runs it against the wallet branch and fails if it changes a file. The run ends with `mutation: 16 written, reject: 44 written`.
+It fails on a mutation vector that the package refuses or hashes like its accepted vector, and on a reject vector that the package hashes or refuses with another code. For a refusal it prints the code, path and message. A run writes nothing if any vector fails, and otherwise replaces `mutation/` and `reject/` as a whole, so the files of a case it no longer has go. The same accepted vectors always give the same files: the `mutation` job of CI runs it against the wallet branch and fails if it changes a file. The run ends with `mutation: 16 written, reject: 45 written`.
 
 `generate-vectors.ts` captures `v2/` and `v3/` from the local Canton setup of the wallet: Canton 3.5.10, the version `--network=mainnet` selects (`scripts/src/lib/version-config.json`), run with `canton/mainnet/canton.conf` and `canton/mainnet/bootstrap.sc`, which bootstraps the synchronizer with protocol version 35 (paths in `../wallet`). The DAR is built with Daml SDK 3.5.11 from dpm (`generator/daml/daml.yaml`) into `generator/daml/.daml/dist/hash-vectors-0.2.0.dar`, a build output that is not committed. Run `pnpm install`, `pnpm generate:all` and `pnpm script:fetch:canton --network=mainnet` in `../wallet` first. `pnpm start:canton` does not return: it starts Canton under pm2 and keeps printing its log. Run it in terminal 1, and continue in terminal 2 once terminal 1 has printed `WALLET-KERNEL-BOOTSTRAP ParticipantId is:` (`canton/mainnet/bootstrap.sc:123`), which comes after the participant is connected to the synchronizer (`canton/mainnet/bootstrap.sc:114-118`). `/livez` of the JSON API answers 200 earlier, so it does not show that the setup is ready.
 
