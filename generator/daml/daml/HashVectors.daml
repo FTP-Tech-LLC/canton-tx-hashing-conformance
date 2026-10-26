@@ -1,7 +1,7 @@
 -- Templates and choices whose prepared transactions make up the hash vectors.
--- The wallet's core/tx-hashing/vectors/README.md lists which scenario uses which.
+-- VECTORS.md of this repository lists which scenario uses which.
 -- Daml-LF records source line numbers, so moving the code below by a line
--- changes the package id that the held-out vectors name.
+-- builds another package id than the one the held-out vectors name.
 
 module HashVectors where
 
