@@ -1,6 +1,3 @@
-// Copyright (c) 2025-2026 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Minimal JSON Ledger API client for the local Canton setup of the wallet
  * (`pnpm start:canton --network=mainnet` with the mock OAuth2 server).

@@ -1,8 +1,8 @@
--- Copyright (c) 2025-2026 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
--- SPDX-License-Identifier: Apache-2.0
-
 -- Templates and choices whose prepared transactions make up the hash vectors.
 -- The wallet's core/tx-hashing/vectors/README.md lists which scenario uses which.
+-- Daml-LF records source line numbers, so moving the code below by a line
+-- changes the package id that the held-out vectors name.
+
 module HashVectors where
 
 import DA.ContractKeys (lookupAllByKey)

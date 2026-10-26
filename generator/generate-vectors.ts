@@ -1,6 +1,3 @@
-// Copyright (c) 2025-2026 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Captures the accepted vectors, vectors/v2/ and vectors/v3/, from the local
  * Canton setup. Each scenario below prepares a transaction of the
