@@ -76,3 +76,49 @@ jobs:
             - name: Hash the V2 vectors with core-tx-visualizer 1.9.1
               working-directory: ts
               run: node check-visualizer.ts ../wallet/core/tx-hashing/vectors
+
+    mutation:
+        runs-on: ubuntu-26.04
+        timeout-minutes: 15
+        steps:
+            # The generator finds the wallet at ../wallet, so this job checks out both side by side.
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  path: conformance
+                  persist-credentials: false
+
+            - name: Checkout the wallet branch
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  repository: nicky2pc/canton-tx-hashing
+                  ref: feat/core-tx-hashing
+                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  path: wallet
+                  sparse-checkout: |
+                      core/ledger-proto
+                      core/tx-hashing
+                  persist-credentials: false
+
+            - name: Set up pnpm and Node.js
+              uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+              with:
+                  working-directory: wallet
+                  node-version-file: .nvmrc
+                  install: false
+
+            - name: Install the wallet's tsx and the dependencies of core-ledger-proto
+              working-directory: wallet
+              run: pnpm install --frozen-lockfile --ignore-scripts --filter wallet-kernel --filter @canton-network/core-ledger-proto
+
+            - name: Make the mutation and reject vectors again
+              working-directory: conformance/generator
+              run: ../../wallet/node_modules/.bin/tsx mutate-vectors.ts
+
+            - name: Fail if a vector changed
+              run: |
+                  changed=$(git -C wallet status --porcelain core/tx-hashing/vectors)
+                  if [ -n "$changed" ]; then
+                      echo "$changed"
+                      exit 1
+                  fi

@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "lib": ["ESNext", "DOM"],
+        "types": ["node"],
+        "typeRoots": ["../../wallet/node_modules/@types"],
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "paths": {
+            "@canton-network/core-ledger-proto": [
+                "../../wallet/core/ledger-proto/src/index.ts"
+            ]
+        }
+    },
+    "include": [
+        "*.ts",
+        "../../wallet/core/tx-hashing/src/__tests__/vite-env.d.ts"
+    ]
+}

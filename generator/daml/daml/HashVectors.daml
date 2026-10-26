@@ -1,0 +1,447 @@
+-- Copyright (c) 2025-2026 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+-- Templates and choices whose prepared transactions make up the hash vectors.
+-- The wallet's core/tx-hashing/vectors/README.md lists which scenario uses which.
+module HashVectors where
+
+import DA.ContractKeys (lookupAllByKey)
+import DA.Exception (GeneralError (..), throw)
+import DA.Map (Map)
+import DA.TextMap (TextMap)
+import DA.Time (isLedgerTimeGE, isLedgerTimeLT)
+
+-- One field per Ledger API value type, so a single create covers all 16.
+data AllValues = AllValues
+  with
+    unitValue : ()
+    boolValue : Bool
+    int64Value : Int
+    numericValue : Decimal
+    textValue : Text
+    timestampValue : Time
+    dateValue : Date
+    partyValue : Party
+    contractIdValue : ContractId Driver
+    optionalValue : Optional Int
+    listValue : [Text]
+    textMapValue : TextMap Int
+    genMapValue : Map Int Text
+    recordValue : Pair
+    variantValue : Shape
+    enumValue : Color
+  deriving (Eq, Show)
+
+data Pair = Pair
+  with
+    name : Text
+    count : Int
+  deriving (Eq, Ord, Show)
+
+data Shape
+  = Circle Decimal
+  | Labelled Text
+  deriving (Eq, Show)
+
+-- A constructor with fields holds a record whose type is named Animal.Dog
+data Animal
+  = Dog with
+      name : Text
+      age : Int
+  | Cat with
+      lives : Int
+  deriving (Eq, Show)
+
+data Color = Red | Green | Blue
+  deriving (Eq, Show)
+
+data AssetView = AssetView
+  with
+    holder : Party
+  deriving (Eq, Show)
+
+interface Asset where
+  viewtype AssetView
+
+  nonconsuming choice Poke : Text
+    controller (view this).holder
+    do pure "poked"
+
+template Plain
+  with
+    owner : Party
+  where
+    signatory owner
+
+    choice Replace : ContractId Plain
+      controller owner
+      do create this
+
+    nonconsuming choice Check : Bool
+      controller owner
+      do pure True
+
+    nonconsuming choice Announce : ()
+      with
+        watcher : Party
+      observer watcher
+      controller owner
+      do pure ()
+
+    nonconsuming choice Describe : Pair
+      controller owner
+      do pure Pair with name = "plain"; count = 1
+
+    interface instance Asset for Plain where
+      view = AssetView with holder = owner
+
+template Joint
+  with
+    first : Party
+    second : Party
+  where
+    signatory first, second
+
+-- Its signatory alone sees it, so another party uses it as a disclosed contract
+template Shared
+  with
+    owner : Party
+  where
+    signatory owner
+
+    nonconsuming choice Use : Text
+      with
+        user : Party
+      controller user
+      do pure "used"
+
+template Keyed
+  with
+    owner : Party
+    label : Text
+  where
+    signatory owner
+    key (owner, label) : (Party, Text)
+    maintainer key._1
+
+template AllKinds
+  with
+    owner : Party
+    values : AllValues
+  where
+    signatory owner
+
+template Texts
+  with
+    owner : Party
+    text : Text
+    parts : [Text]
+    labels : TextMap Text
+  where
+    signatory owner
+
+template Numerics
+  with
+    owner : Party
+    integral : [Numeric 0]
+    decimal : [Decimal]
+    fine : [Numeric 37]
+  where
+    signatory owner
+
+template Times
+  with
+    owner : Party
+    times : [Time]
+    dates : [Date]
+  where
+    signatory owner
+
+-- The participant leaves out the trailing None fields of a record: with
+-- `absent` None, the transaction has no field for it.
+template Optionals
+  with
+    owner : Party
+    flat : [Optional Int]
+    nested : [Optional (Optional Int)]
+    deep : Optional (Optional (Optional Text))
+    pair : Optional Pair
+    absent : Optional Int
+  where
+    signatory owner
+
+template Maps
+  with
+    owner : Party
+    textMap : TextMap Int
+    nestedMap : TextMap (TextMap Text)
+    genMap : Map Int Text
+    recordKeys : Map Pair Bool
+  where
+    signatory owner
+
+template Variants
+  with
+    owner : Party
+    shapes : [Shape]
+    animals : [Animal]
+    colors : [Color]
+    eithers : [Either Int Text]
+  where
+    signatory owner
+
+template Empties
+  with
+    owner : Party
+    emptyList : [Int]
+    emptyTextMap : TextMap Int
+    emptyGenMap : Map Int Text
+    none : Optional Int
+    emptyText : Text
+    emptyInner : [[Int]]
+  where
+    signatory owner
+
+template Ints
+  with
+    owner : Party
+    ints : [Int]
+  where
+    signatory owner
+
+template Driver
+  with
+    owner : Party
+  where
+    signatory owner
+
+    nonconsuming choice NestedCreates : [ContractId Plain]
+      with
+        depth : Int
+      controller owner
+      do
+        cid <- create Plain with owner
+        rest <- if depth > 1
+          then exercise self NestedCreates with depth = depth - 1
+          else pure []
+        pure (cid :: rest)
+
+    nonconsuming choice DeepNesting : ContractId Plain
+      with
+        depth : Int
+      controller owner
+      do
+        if depth > 1
+          then exercise self DeepNesting with depth = depth - 1
+          else exercise self MakePlain
+
+    nonconsuming choice MakePlain : ContractId Plain
+      controller owner
+      do create Plain with owner
+
+    nonconsuming choice FetchPlain : Plain
+      with
+        target : ContractId Plain
+      controller owner
+      do fetch target
+
+    nonconsuming choice FetchAsset : AssetView
+      with
+        target : ContractId Asset
+      controller owner
+      do view <$> fetch target
+
+    -- Each comparison with the ledger time bounds it: the participant writes
+    -- the bounds as the minimum and maximum ledger effective time.
+    nonconsuming choice CheckTime : ()
+      with
+        after : Time
+        before : Time
+      controller owner
+      do
+        late <- isLedgerTimeGE after
+        early <- isLedgerTimeLT before
+        assertMsg "the ledger time is out of bounds" (late && early)
+
+    -- What runs inside `try` ends up under a rollback node. Canton 3.5 refuses
+    -- to roll back a create or a consuming exercise, so this is a fetch and a
+    -- non-consuming exercise that creates nothing.
+    nonconsuming choice TryCatch : Text
+      controller owner
+      do
+        try do
+          _ <- fetch self
+          exercise self Noop
+          throw (GeneralError "rolled back")
+        catch
+          GeneralError reason -> pure reason
+
+    nonconsuming choice Noop : ()
+      controller owner
+      do pure ()
+
+    nonconsuming choice ArchiveByKey : ()
+      with
+        label : Text
+      controller owner
+      do exerciseByKey @Keyed (owner, label) Archive
+
+    nonconsuming choice FetchKeyed : ContractId Keyed
+      with
+        label : Text
+      controller owner
+      do fst <$> fetchByKey @Keyed (owner, label)
+
+    nonconsuming choice LookupKeyed : Optional (ContractId Keyed)
+      with
+        label : Text
+      controller owner
+      do lookupByKey @Keyed (owner, label)
+
+-- Only the held-out vectors use the templates below, and they use no others.
+
+data EscrowKey = EscrowKey
+  with
+    buyer : Party
+    seller : Party
+    reference : Text
+  deriving (Eq, Show)
+
+-- A key of a record type with two maintainers. Both sign the contract, so
+-- its choices may look up keys that both maintain.
+template Escrow
+  with
+    buyer : Party
+    seller : Party
+    reference : Text
+    amount : Decimal
+  where
+    signatory buyer, seller
+    key (EscrowKey with buyer; seller; reference) : EscrowKey
+    maintainer [key.buyer, key.seller]
+
+    nonconsuming choice Audit : (Optional (ContractId Escrow), Optional (ContractId Escrow))
+      with
+        otherReference : Text
+      controller buyer
+      do
+        let own = key this
+        found <- lookupByKey @Escrow own
+        missing <- lookupByKey @Escrow (own with reference = otherReference)
+        _ <- fetchByKey @Escrow own
+        pure (found, missing)
+
+data Seat
+  = Standing
+  | Numbered with
+      row : Text
+      number : Int
+  deriving (Eq, Show)
+
+-- A key with a variant and an optional inside an optional
+template Ticket
+  with
+    holder : Party
+    event : Text
+    seat : Seat
+    section : Optional (Optional Text)
+  where
+    signatory holder
+    key (holder, event, seat, section) : (Party, Text, Seat, Optional (Optional Text))
+    maintainer key._1
+
+    choice Reseat : ContractId Ticket
+      with
+        newSeat : Seat
+      controller holder
+      do create this with seat = newSeat
+
+data BadgeView = BadgeView
+  with
+    bearer : Party
+    title : Text
+  deriving (Eq, Show)
+
+interface Badge where
+  viewtype BadgeView
+
+  nonconsuming choice Present : Text
+    controller (view this).bearer
+    do pure (view this).title
+
+-- Keys need not be unique: two tags may have the same key.
+template Tag
+  with
+    owner : Party
+    name : Text
+    serial : Int
+  where
+    signatory owner
+    key (owner, name) : (Party, Text)
+    maintainer key._1
+
+    choice Rename : ContractId Tag
+      with
+        newName : Text
+      controller owner
+      do create this with name = newName
+
+    nonconsuming choice Ping : Int
+      controller owner
+      do pure serial
+
+    interface instance Badge for Tag where
+      view = BadgeView with bearer = owner; title = name
+
+template Registry
+  with
+    owner : Party
+  where
+    signatory owner
+
+    nonconsuming choice Inspect : Tag
+      with
+        target : ContractId Tag
+      controller owner
+      do fetch target
+
+    nonconsuming choice FindAll : [ContractId Tag]
+      with
+        name : Text
+      controller owner
+      do map fst <$> lookupAllByKey @Tag (owner, name)
+
+    nonconsuming choice FindTicket : Optional (ContractId Ticket)
+      with
+        event : Text
+        seat : Seat
+        section : Optional (Optional Text)
+      controller owner
+      do lookupByKey @Ticket (owner, event, seat, section)
+
+    -- The lookup finds the tag that the exercise creates
+    nonconsuming choice Sweep : ContractId Tag
+      with
+        name : Text
+        newName : Text
+      controller owner
+      do
+        _ <- fetchByKey @Tag (owner, name)
+        renamed <- exerciseByKey @Tag (owner, name) Rename with newName
+        _ <- lookupByKey @Tag (owner, newName)
+        pure renamed
+
+    -- As in Driver.TryCatch, the rollback holds no create and no consuming
+    -- exercise, which Canton 3.5 refuses to roll back.
+    nonconsuming choice Rehearse : Text
+      with
+        name : Text
+      controller owner
+      do
+        try do
+          _ <- fetchByKey @Tag (owner, name)
+          _ <- exerciseByKey @Tag (owner, name) Ping
+          _ <- lookupAllByKey @Tag (owner, name)
+          throw (GeneralError "rehearsed")
+        catch
+          GeneralError reason -> pure reason
