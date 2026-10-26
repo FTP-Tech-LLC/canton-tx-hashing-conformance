@@ -100,7 +100,7 @@ Each vector is a JSON file with the bytes of a prepared transaction, its scheme,
 
 ## Wallet repository
 
-CI runs on every push to this repository, on a manual run and every Monday at 06:00 UTC, each time against the branch as it is then. GitHub disables the schedule of a public repository after 60 days without activity. Until the branch is public, CI checks it out from the private `nicky2pc/canton-tx-hashing` with the secret `WALLET_REPO_TOKEN`: a fine-grained personal access token with read-only access to the contents of that repository and no other. Once the branch is in a public fork, set `repository` in the three wallet checkouts of `.github/workflows/conformance.yml` to the fork, remove their `token` lines, delete the secret, and point the links in this README to the fork.
+CI runs on every push to this repository, on a manual run and every Monday at 06:00 UTC, each time against the branch as it is then. GitHub disables the schedule of a public repository after 60 days without activity. Until the branch is public, CI checks it out from the private `nicky2pc/canton-tx-hashing` with the secret `WALLET_DEPLOY_KEY`: the private half of a read-only deploy key of that repository, which opens no other. Once the branch is in a public fork, set `repository` in the three wallet checkouts of `.github/workflows/conformance.yml` to the fork, remove their `ssh-key` lines, delete the secret and the deploy key, and point the links in this README to the fork.
 
 ## License
 

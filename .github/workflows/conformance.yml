@@ -24,7 +24,7 @@ jobs:
               with:
                   repository: nicky2pc/canton-tx-hashing
                   ref: feat/core-tx-hashing
-                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
                   path: wallet
                   sparse-checkout: core/tx-hashing/vectors
                   persist-credentials: false
@@ -61,7 +61,7 @@ jobs:
               with:
                   repository: nicky2pc/canton-tx-hashing
                   ref: feat/core-tx-hashing
-                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
                   path: wallet
                   sparse-checkout: core/tx-hashing/vectors
                   persist-credentials: false
@@ -100,7 +100,7 @@ jobs:
               with:
                   repository: nicky2pc/canton-tx-hashing
                   ref: feat/core-tx-hashing
-                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
                   path: wallet
                   sparse-checkout: |
                       core/ledger-proto
