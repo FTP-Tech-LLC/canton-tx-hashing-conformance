@@ -26,7 +26,7 @@ Each script prints one line of counts, `python v2: N/N, v3: M/M, mutation: K/K, 
 
 ## Running locally
 
-Needs Python 3.10 to 3.13 (grpcio-tools 1.70.0 has no wheels for 3.14, setuptools 84.0.0 needs 3.10), Node 24.22.1, curl, and the branch `feat/core-tx-hashing` of the wallet repository checked out next to this repository, as `../wallet`.
+Needs Python 3.10 to 3.13 (grpcio-tools 1.70.0 has no wheels for 3.14, setuptools 84.0.0 needs 3.10), Node 24.22.1, curl, and the branch `feat/core-tx-hashing` of the wallet repository checked out next to this repository, as `../wallet`. The commands are for a POSIX shell; on Windows, run them in WSL or Git Bash.
 
 ```sh
 python3.13 -m venv .venv
