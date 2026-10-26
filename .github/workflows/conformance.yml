@@ -44,6 +44,9 @@ jobs:
             - name: Hash the vectors with the Python reference
               run: python -I python/check_vectors.py wallet/core/tx-hashing/vectors
 
+            - name: Hash the Canton 3.6.4 capture with the Python example
+              run: python -I python/check_vectors.py captures/canton-3.6.4-pv36
+
     visualizer:
         runs-on: ubuntu-26.04
         timeout-minutes: 15
@@ -76,6 +79,10 @@ jobs:
             - name: Hash the V2 vectors with core-tx-visualizer 1.9.1
               working-directory: ts
               run: node check-visualizer.ts ../wallet/core/tx-hashing/vectors
+
+            - name: Hash the V2 vectors of the Canton 3.6.4 capture with core-tx-visualizer 1.9.1
+              working-directory: ts
+              run: node check-visualizer.ts ../captures/canton-3.6.4-pv36
 
     mutation:
         runs-on: ubuntu-26.04

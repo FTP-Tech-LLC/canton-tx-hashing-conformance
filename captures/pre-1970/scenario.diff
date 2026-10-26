@@ -1,0 +1,21 @@
+diff --git a/generator/generate-vectors.ts b/generator/generate-vectors.ts
+index 4eb2831..7362552 100644
+--- a/generator/generate-vectors.ts
++++ b/generator/generate-vectors.ts
+@@ -429,6 +429,16 @@ const SCENARIOS: readonly AcceptedScenario[] = [
+             before: new Date(Date.now() + HOUR).toISOString(),
+         })),
+     },
++    {
++        // The same choice with a lower bound before 1970: the participant
++        // writes the minimum ledger effective time from a negative Long.
++        name: 'ledger-time-bounds-pre-1970',
++        v2: true,
++        setup: onDriver('CheckTime', () => ({
++            after: '1960-01-01T00:00:00Z',
++            before: new Date(Date.now() + HOUR).toISOString(),
++        })),
++    },
+     { name: 'rollback', v2: true, setup: onDriver('TryCatch') },
+     {
+         name: 'create-with-key',

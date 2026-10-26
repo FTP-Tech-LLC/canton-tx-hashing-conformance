@@ -1,0 +1,13 @@
+{
+    "id": "reject-v2-node-without-version",
+    "kind": "reject",
+    "scheme": "HASHING_SCHEME_VERSION_V2",
+    "preparedTransaction": "Cg0KAzIuMRIBMBoDCgEwEoYCEoABClhoYXNoLXZlY3RvcnMtb3duZXI6OjEyMjA1MDA4OWU4MWMyNDM4OTczNTI5OWE2NTc2MDJkNmNiMTVkMWY3NTJhNWZhMjE4M2Y1YzBlMGQ2YzdmYThiN2RmEiQ5MGE2MmUwMi03ZjNmLTQ0OWUtYmUxMS1jMzMwZjNkNDEwOGIaUndhbGxldDo6MTIyMGU3YjIzZWE1MmViNWM2NzJmYjBiMWNkYmM5MTY5MjJmZmVkM2RkNzY3NmMyMjNhNjA1NjY0MzE1ZTJkNDNlZGQ6OjM2LTAqJDRmZGU1NDVkLTI1MWEtNDg0ZC1hM2EyLTQ3NGZjZDcwMmMwOTCst43ssdeXAw==",
+    "expected": {
+        "error": "UNSUPPORTED_NODE_VERSION"
+    },
+    "source": {
+        "from": "v2-create-plain",
+        "mutation": "the v1 node of node 0 removed, which leaves only its node id, and its seed removed as well"
+    }
+}

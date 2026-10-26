@@ -16,6 +16,8 @@ The package and its vectors live in the wallet repository, in `core/tx-hashing/`
 | `python/check_vectors.py` | `v2/`, `v3/`, `mutation/`, `held-out/`               | `daml_transaction_hashing_v2.py` for V2, `daml_transaction_hashing_v3.py` for V3 |
 | `ts/check-visualizer.ts`  | the V2 vectors of `v2/`, `mutation/` and `held-out/` | `hashPreparedTransaction` of `@canton-network/core-tx-visualizer` 1.9.1          |
 
+CI runs both scripts on the wallet's vectors and on [`captures/canton-3.6.4-pv36/`](captures/README.md#canton-364-pv36), the corpus captured again on Canton 3.6.4 with protocol version 36.
+
 The Python reference hashes each vector as the example's `interactive_submission.py` does (lines 142-149): `encode_prepared_transaction(prepared_transaction, create_nodes_dict(prepared_transaction))` of the module of the vector's scheme, with its own lookup of nodes and seeds. For it `v2/`, `v3/`, `mutation/` and `held-out/` must hold vectors, and every vector of `held-out/` must be V3, so that a run without the held-out V3 cases fails. The visualizer hashes every vector of `v2/`, `mutation/` and `held-out/` whose scheme is V2 and that has an expected hash, and `v2/` must hold at least one. The held-out vectors are all V3, so it counts `held-out 0/0`, as it does for a missing `mutation/` or `held-out/`.
 
 Each script prints one line of counts, `python v2: N/N, v3: M/M, mutation: K/K, held-out: H/H, mismatches: 0` or `visualizer 1.9.1: accepted N/N, mutation K/K, held-out H/H`. If a vector does not give its expected hash, the script prints its id, or its file name, with both hashes or with the error, and exits non-zero. `check-visualizer.ts` also exits non-zero if the installed visualizer is not 1.9.1.
@@ -32,12 +34,14 @@ python3.13 -m venv .venv
 pip install --only-binary :all: --require-hashes -r python/requirements.txt
 ./python/fetch_reference.sh
 python -I python/check_vectors.py ../wallet/core/tx-hashing/vectors
+python -I python/check_vectors.py captures/canton-3.6.4-pv36
 ```
 
 ```sh
 cd ts
 npm ci
 node check-visualizer.ts ../../wallet/core/tx-hashing/vectors
+node check-visualizer.ts ../captures/canton-3.6.4-pv36
 ```
 
 `fetch_reference.sh` downloads into a new temporary directory, checks every file against the sha256 pinned in the script, generates the bindings with `grpc_tools.protoc` and only then moves the result to `python/build/`: `reference/` (the three Python files), `proto/` (the `.proto` files) and `gen/` (the bindings). It deletes `python/build/` first, so after any failure there is none. `PYTHON` selects the interpreter, `python3` by default. Python runs with `-I`, so neither the current directory nor the script's directory is on its import path, and `check_vectors.py` adds only `python/build/gen` and `python/build/reference`, at the end. pip installs wheels only and builds nothing from source. `ts/.npmrc` turns off install scripts, and Node 24 runs `check-visualizer.ts` by stripping its types, so `npm ci` installs only the visualizer and its dependencies.
