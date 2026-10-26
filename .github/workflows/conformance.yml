@@ -38,10 +38,10 @@ jobs:
               run: |
                   python -m pip install --only-binary :all: --require-hashes -r python/requirements.txt
 
-            - name: Fetch the Python reference
+            - name: Fetch the Python example
               run: ./python/fetch_reference.sh
 
-            - name: Hash the vectors with the Python reference
+            - name: Hash the vectors with the Python example
               run: python -I python/check_vectors.py wallet/core/tx-hashing/vectors
 
             - name: Hash the Canton 3.6.4 capture with the Python example

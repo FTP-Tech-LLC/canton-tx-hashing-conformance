@@ -18,11 +18,11 @@ The package and its vectors live in the wallet repository, in `core/tx-hashing/`
 
 CI runs both scripts on the wallet's vectors and on [`captures/canton-3.6.4-pv36/`](captures/README.md#canton-364-pv36), the corpus captured again on Canton 3.6.4 with protocol version 36.
 
-The Python reference hashes each vector as the example's `interactive_submission.py` does (lines 142-149): `encode_prepared_transaction(prepared_transaction, create_nodes_dict(prepared_transaction))` of the module of the vector's scheme, with its own lookup of nodes and seeds. For it `v2/`, `v3/`, `mutation/` and `held-out/` must hold vectors, and every vector of `held-out/` must be V3, so that a run without the held-out V3 cases fails. The visualizer hashes every vector of `v2/`, `mutation/` and `held-out/` whose scheme is V2 and that has an expected hash, and `v2/` must hold at least one. The held-out vectors are all V3, so it counts `held-out 0/0`, as it does for a missing `mutation/` or `held-out/`.
+The Python example hashes each vector as its `interactive_submission.py` does (lines 142-149): `encode_prepared_transaction(prepared_transaction, create_nodes_dict(prepared_transaction))` of the module of the vector's scheme, with its own lookup of nodes and seeds. For it `v2/`, `v3/`, `mutation/` and `held-out/` must hold vectors, and every vector of `held-out/` must be V3, so that a run without the held-out V3 cases fails. The visualizer hashes every vector of `v2/`, `mutation/` and `held-out/` whose scheme is V2 and that has an expected hash, and `v2/` must hold at least one. The held-out vectors are all V3, so it counts `held-out 0/0`, as it does for a missing `mutation/` or `held-out/`.
 
 Each script prints one line of counts, `python v2: N/N, v3: M/M, mutation: K/K, held-out: H/H, mismatches: 0` or `visualizer 1.9.1: accepted N/N, mutation K/K, held-out H/H`. If a vector does not give its expected hash, the script prints its id, or its file name, with both hashes or with the error, and exits non-zero. `check-visualizer.ts` also exits non-zero if the installed visualizer is not 1.9.1.
 
-`reject/` is not run. The Python reference does not make the refusals that the reject vectors expect: it hashes most of them ([where the package differs](VECTORS.md#where-the-package-differs-from-the-scala-hasher-and-the-python-example)). The tests of the package in the wallet repository run them.
+`reject/` is not run. The Python example does not make the refusals that the reject vectors expect: it hashes most of them ([where the package differs](VECTORS.md#where-the-package-differs-from-the-scala-hasher-and-the-python-example)). The tests of the package in the wallet repository run them.
 
 ## Running locally
 
