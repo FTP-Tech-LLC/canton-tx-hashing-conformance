@@ -2,8 +2,10 @@
 
 Checks the hash vectors of `@canton-network/core-tx-hashing` against two references whose hashing code is written separately from the package:
 
-- the Python hashing example of Canton v3.5.1, unmodified. It decodes with protobuf (upb), which refuses some malformed encodings that protobuf-ts accepts (Decoder leniency in [where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-example)).
+- the Python hashing example of Canton v3.5.1, unmodified. It decodes with protobuf (upb), which refuses some malformed encodings that protobuf-ts accepts ([Decoder leniency](VECTORS.md#decoder-leniency) in VECTORS.md).
 - the published `@canton-network/core-tx-visualizer` 1.9.1, which hashes V2 only. It decodes with `@canton-network/core-ledger-proto` (protobuf-ts), as the package does, so it checks the V2 hashing but not the decoding.
+
+[VECTORS.md](VECTORS.md) is the reference for the vectors: where the package, Canton's Scala hasher and the Python example differ, what the participant writes, and what each vector covers.
 
 The package and its vectors live in the wallet repository, in `core/tx-hashing/`. These checks and the generators of the vectors live here so that the wallet's CI needs no Python, no protoc, no Canton sources, no old release of the visualizer, no participant and no Daml SDK.
 
@@ -18,7 +20,7 @@ The Python reference hashes each vector as the example's `interactive_submission
 
 Each script prints one line of counts, `python v2: N/N, v3: M/M, mutation: K/K, held-out: H/H, mismatches: 0` or `visualizer 1.9.1: accepted N/N, mutation K/K, held-out H/H`. If a vector does not give its expected hash, the script prints its id, or its file name, with both hashes or with the error, and exits non-zero. `check-visualizer.ts` also exits non-zero if the installed visualizer is not 1.9.1.
 
-`reject/` is not run. The Python reference does not make the refusals that the reject vectors expect: it hashes most of them ([where it differs](https://github.com/nicky2pc/canton-tx-hashing/blob/feat/core-tx-hashing/core/tx-hashing/vectors/README.md#where-this-differs-from-the-scala-hasher-and-the-python-example)). The tests of the package in the wallet repository run them.
+`reject/` is not run. The Python reference does not make the refusals that the reject vectors expect: it hashes most of them ([where the package differs](VECTORS.md#where-the-package-differs-from-the-scala-hasher-and-the-python-example)). The tests of the package in the wallet repository run them.
 
 ## Running locally
 

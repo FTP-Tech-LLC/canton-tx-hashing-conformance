@@ -17,9 +17,9 @@
  * With --synchronizer <id> it uses that synchronizer, which it needs when the
  * participant is connected to more than one.
  *
- * The vectors are those of ../wallet/core/tx-hashing/vectors/, whose
- * README.md describes the scenarios. README.md of this repository says how to
- * run this.
+ * The vectors are those of ../wallet/core/tx-hashing/vectors/. VECTORS.md of
+ * this repository describes the scenarios, and its README.md says how to run
+ * this.
  */
 
 import { existsSync } from 'node:fs'
@@ -104,7 +104,7 @@ interface Scenario {
 }
 
 interface AcceptedScenario extends Scenario {
-    /** False for a transaction that V2 vectors cannot hold: the wallet's vectors/README.md says why */
+    /** False for a transaction that V2 vectors cannot hold: VECTORS.md says why */
     readonly v2: boolean
 }
 

@@ -10,7 +10,8 @@
  * The same accepted vectors always give the same files. A run writes nothing
  * if any vector fails, and otherwise replaces vectors/mutation/ and
  * vectors/reject/ as a whole. The vectors are those of
- * ../wallet/core/tx-hashing/vectors/, whose README.md lists them.
+ * ../wallet/core/tx-hashing/vectors/, and VECTORS.md of this repository lists
+ * them.
  */
 
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
