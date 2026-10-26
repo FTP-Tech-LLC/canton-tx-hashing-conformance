@@ -1,6 +1,9 @@
 # canton-tx-hashing-conformance
 
-Checks the hash vectors of `@canton-network/core-tx-hashing` against two references whose hashing code is written separately from the package.
+Checks the hash vectors of `@canton-network/core-tx-hashing` against two implementations that share no hashing code with it:
+
+- Canton's Python hashing example (V2 and V3);
+- the published `@canton-network/core-tx-visualizer` 1.9.1 (V2), the release that the acceptance criteria of Canton Dev Fund proposal [canton-foundation/canton-dev-fund#617](https://github.com/canton-foundation/canton-dev-fund/pull/617) name.
 
 The package and its vectors live in `core/tx-hashing/` of the wallet repository. [VECTORS.md](VECTORS.md) is the reference for the vectors. It says where the package, Canton's Scala hasher and the Python example differ, what the participant writes, and what each vector covers.
 
@@ -8,10 +11,12 @@ These checks and the generators of the vectors live here, not in the wallet. So 
 
 ## What is checked
 
-| Script                    | Reference                                                                                                                                 | Vectors                                              | Decoder                                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `python/check_vectors.py` | The Python hashing example of Canton v3.5.1, unmodified: `daml_transaction_hashing_v2.py` for V2, `daml_transaction_hashing_v3.py` for V3 | `v2/`, `v3/`, `mutation/`, `held-out/`               | protobuf (upb). It refuses some malformed encodings that protobuf-ts accepts ([Decoder leniency](VECTORS.md#decoder-leniency)). |
-| `ts/check-visualizer.ts`  | `hashPreparedTransaction` of the published `@canton-network/core-tx-visualizer` 1.9.1, which hashes V2 only                               | the V2 vectors of `v2/`, `mutation/` and `held-out/` | `@canton-network/core-ledger-proto` (protobuf-ts), as the package does. So it checks the V2 hashing but not the decoding.       |
+| Script                    | Reference                                                                                                                                 | Vectors                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `python/check_vectors.py` | The Python hashing example of Canton v3.5.1, unmodified: `daml_transaction_hashing_v2.py` for V2, `daml_transaction_hashing_v3.py` for V3 | `v2/`, `v3/`, `mutation/`, `held-out/`               |
+| `ts/check-visualizer.ts`  | `hashPreparedTransaction` of the published `@canton-network/core-tx-visualizer` 1.9.1, which hashes V2 only                               | the V2 vectors of `v2/`, `mutation/` and `held-out/` |
+
+The Python example decodes with upb, which refuses some malformed encodings that protobuf-ts accepts ([Decoder leniency](VECTORS.md#decoder-leniency)). The visualizer decodes with `@canton-network/core-ledger-proto`, as the package does, so it checks the V2 hashing, not the decoding.
 
 CI runs both scripts on the wallet's vectors and on [`captures/canton-3.6.4-pv36/`](captures/README.md#canton-364-pv36), the corpus captured again on Canton 3.6.4 with protocol version 36.
 
@@ -26,12 +31,20 @@ You need:
 - A POSIX shell. On Windows, run the commands in WSL or Git Bash.
 - The branch `feat/core-tx-hashing` of the wallet repository, checked out next to this repository as `../wallet`.
 
+To clone both side by side:
+
+```sh
+git clone https://github.com/FTP-Tech-LLC/canton-tx-hashing-conformance
+git clone --branch feat/core-tx-hashing https://github.com/FTP-Tech-LLC/wallet wallet
+cd canton-tx-hashing-conformance
+```
+
 Run, from this repository:
 
 1. Install the pinned Python packages in a virtual environment:
 
     ```sh
-    python3.13 -m venv .venv
+    python3.13 -m venv .venv  # or python3.10 to python3.12
     . .venv/bin/activate
     pip install --only-binary :all: --require-hashes -r python/requirements.txt
     ```
@@ -86,28 +99,30 @@ Run, from this repository:
 
 The generators run the package's source from `../wallet/core/tx-hashing/src`. `generator/tsconfig.json` maps `@canton-network/core-ledger-proto` to `../wallet/core/ledger-proto/src`, and the wallet's `tsx`, started in `generator/`, applies that mapping.
 
-Both generators need the wallet's dependencies, installed with its pnpm 12.15.0:
-
-```sh
-# in ../wallet
-pnpm install
-```
-
 ### Mutation and reject vectors
 
-`mutate-vectors.ts` makes `mutation/` and `reject/` from `v2/` and `v3/`, and needs no participant:
+`mutate-vectors.ts` makes `mutation/` and `reject/` from `v2/` and `v3/`, and needs no participant.
 
-```sh
-cd generator
-../../wallet/node_modules/.bin/tsx mutate-vectors.ts
-```
+1. Install the wallet's `tsx` and the dependencies of `@canton-network/core-ledger-proto`, as the `mutation` job of CI does, with the wallet's pnpm 12.15.0:
 
-The run ends with `mutation: 16 written, reject: 45 written`.
+    ```sh
+    # in ../wallet
+    pnpm install --frozen-lockfile --ignore-scripts --filter wallet-kernel --filter @canton-network/core-ledger-proto
+    ```
+
+2. Make the vectors and compare them with the committed ones:
+
+    ```sh
+    cd generator
+    ../../wallet/node_modules/.bin/tsx mutate-vectors.ts
+    git -C ../../wallet status --short core/tx-hashing/vectors
+    ```
+
+    The run ends with `mutation: 16 written, reject: 45 written`. On the committed `v2/` and `v3/` it writes the committed files again, so `git -C ../../wallet status --short core/tx-hashing/vectors` then prints nothing. The `mutation` job of CI checks the same.
 
 - It fails on a mutation vector that the package refuses or hashes like its accepted vector. It also fails on a reject vector that the package hashes or refuses with another code.
 - For a refusal it prints the code, path and message.
 - A run writes nothing if any vector fails. Otherwise it replaces `mutation/` and `reject/` as a whole, so the files of a case it no longer has go.
-- The same accepted vectors always give the same files. The `mutation` job of CI runs it against the wallet branch and fails if it changes a file.
 
 ### Accepted and held-out vectors
 
@@ -122,10 +137,13 @@ The run ends with `mutation: 16 written, reject: 45 written`.
 1. Prepare the wallet's Canton setup:
 
     ```sh
-    # in ../wallet, after pnpm install
+    # in ../wallet
+    pnpm install --frozen-lockfile
     pnpm generate:all
     pnpm script:fetch:canton --network=mainnet
     ```
+
+    `pnpm generate:all` installs `dpm`, the Daml package manager, unless it is there, and downloads the Splice LocalNet, about 800 MB. It took 5-7 minutes in the two capture runs. Open terminal 2 after it, so that `dpm` is on its `PATH`.
 
 2. In terminal 1, start the mock OAuth2 server and Canton:
 
@@ -146,11 +164,25 @@ The run ends with `mutation: 16 written, reject: 45 written`.
     (cd generator/daml && dpm build)
     cd generator
     ../../wallet/node_modules/.bin/tsx generate-vectors.ts --execute
+    ../../wallet/node_modules/.bin/tsx generate-vectors.ts --held-out --execute
     ```
 
-    The run ends with a line like `v2: 24 written, v3: 31 written, mismatches: 0, executed: 53 ok, refused as expected: 2`.
+    The two runs end with lines like these:
 
-4. Make `mutation/` and `reject/` again with [`mutate-vectors.ts`](#mutation-and-reject-vectors). Until then the package's `src/mutation.test.ts` fails: it checks that each mutation vector is its accepted vector with one byte changed.
+    ```
+    v2: 24 written, v3: 31 written, mismatches: 0, executed: 53 ok, refused as expected: 2
+    held-out: 12 written, mismatches: 0, executed: 12 ok, refused as expected: 0
+    ```
+
+4. Keep or drop the new vectors. They differ from the committed ones, as every run makes new parties, contracts and times. So the result is `mismatches: 0` and the executions, not the files.
+
+    To keep them, make `mutation/` and `reject/` again with [`mutate-vectors.ts`](#mutation-and-reject-vectors). Until then the package's `src/mutation.test.ts` fails: it checks that each mutation vector is its accepted vector with one byte changed.
+
+    To go back to the committed vectors:
+
+    ```sh
+    git -C ../../wallet checkout -- core/tx-hashing/vectors
+    ```
 
 5. Stop the local Canton setup:
 
@@ -173,13 +205,13 @@ What a run does:
 - The generator uploads the DAR, onboards two external parties with new Ed25519 keys and runs the scenarios in their order. Each runs after the generator has executed what its transaction needs, such as the contract it exercises.
 - A run writes nothing if any vector fails. For a mismatch it prints the scenario with both hashes, and for a refusal by the package its code, path and message.
 - Without `--only` it replaces `v2/` and `v3/`, so the files of a scenario it no longer has go. A run without `--held-out` never touches `mutation/`, `reject/` or `held-out/`.
-- Every run makes new parties, contracts and times, so its vectors are new as well. They name the package id of version 0.2.0 of the DAR.
+- The new vectors name the package id of version 0.2.0 of the DAR.
 
 ### Changing HashVectors.daml
 
-After a change to `HashVectors.daml`, start Canton again before a run: `pnpm start:canton` replaces the running one.
+The participant refuses a changed DAR next to the one it has: with the same version (`KNOWN_PACKAGE_VERSION`) and with a new one (`NOT_VALID_UPGRADE_PACKAGE`). An upgrade must implement the interfaces of the version it upgrades, and each version of this package implements only the interfaces it defines itself.
 
-The participant refuses a changed DAR under the version of the one it has (`KNOWN_PACKAGE_VERSION`), and under a new version too (`NOT_VALID_UPGRADE_PACKAGE`). A new version must implement the interfaces of the version it upgrades. The templates of each version of this package implement the interfaces that this version defines itself.
+So after a change to `HashVectors.daml`, start Canton again: `pnpm start:canton` replaces the running one, and its ledger starts empty.
 
 ## Vectors from another language
 
@@ -209,15 +241,12 @@ The files from `digital-asset/canton`:
 
 ## CI
 
-CI runs on every push to this repository, on a manual run and every Monday at 06:00 UTC. Each run checks the wallet branch as it is then. GitHub disables the schedule of a public repository after 60 days without activity.
+CI runs three jobs on every push, on a manual run and every Monday at 06:00 UTC. Each run checks the wallet branch as it is then.
 
-Until the branch is public, CI checks it out from the private `nicky2pc/canton-tx-hashing` with the secret `WALLET_DEPLOY_KEY`. The secret is the private half of a read-only deploy key of that repository, which opens no other.
+- `python` and `visualizer` run the two scripts on the wallet's vectors and on `captures/canton-3.6.4-pv36/`.
+- `mutation` runs `mutate-vectors.ts` and fails if it changes a file of `mutation/` or `reject/`.
 
-Once the branch is in a public fork:
-
-1. Set `repository` in the three wallet checkouts of `.github/workflows/conformance.yml` to the fork, and remove their `ssh-key` lines.
-2. Delete the secret and the deploy key.
-3. Point the links in this README to the fork.
+GitHub disables the schedule of a public repository after 60 days without activity.
 
 ## License
 
