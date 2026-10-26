@@ -1,0 +1,78 @@
+name: conformance
+
+on:
+    push:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 6 * * 1'
+
+permissions:
+    contents: read
+
+jobs:
+    python:
+        runs-on: ubuntu-26.04
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: Checkout the wallet branch
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  repository: nicky2pc/canton-tx-hashing
+                  ref: feat/core-tx-hashing
+                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  path: wallet
+                  sparse-checkout: core/tx-hashing/vectors
+                  persist-credentials: false
+
+            - name: Set up Python
+              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+              with:
+                  python-version: '3.13'
+
+            - name: Install protobuf and grpcio-tools
+              run: |
+                  python -m pip install --only-binary :all: --require-hashes -r python/requirements.txt
+
+            - name: Fetch the Python reference
+              run: ./python/fetch_reference.sh
+
+            - name: Hash the vectors with the Python reference
+              run: python -I python/check_vectors.py wallet/core/tx-hashing/vectors
+
+    visualizer:
+        runs-on: ubuntu-26.04
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: Checkout the wallet branch
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  repository: nicky2pc/canton-tx-hashing
+                  ref: feat/core-tx-hashing
+                  token: ${{ secrets.WALLET_REPO_TOKEN }}
+                  path: wallet
+                  sparse-checkout: core/tx-hashing/vectors
+                  persist-credentials: false
+
+            - name: Set up Node.js
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version-file: wallet/.nvmrc
+                  package-manager-cache: false
+
+            - name: Install core-tx-visualizer 1.9.1
+              working-directory: ts
+              run: npm ci
+
+            - name: Hash the V2 vectors with core-tx-visualizer 1.9.1
+              working-directory: ts
+              run: node check-visualizer.ts ../wallet/core/tx-hashing/vectors

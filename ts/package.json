@@ -1,0 +1,11 @@
+{
+    "name": "check-visualizer",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@canton-network/core-tx-visualizer": "1.9.1"
+    },
+    "overrides": {
+        "@canton-network/core-ledger-proto": "1.9.1"
+    }
+}
