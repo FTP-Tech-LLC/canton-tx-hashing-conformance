@@ -20,9 +20,8 @@ jobs:
             - name: Checkout the wallet branch
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
-                  repository: nicky2pc/canton-tx-hashing
-                  ref: pr/core-tx-hashing
-                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
+                  repository: FTP-Tech-LLC/wallet
+                  ref: feat/core-tx-hashing
                   path: wallet
                   sparse-checkout: core/tx-hashing/vectors
                   persist-credentials: false
@@ -57,9 +56,8 @@ jobs:
             - name: Checkout the wallet branch
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
-                  repository: nicky2pc/canton-tx-hashing
-                  ref: pr/core-tx-hashing
-                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
+                  repository: FTP-Tech-LLC/wallet
+                  ref: feat/core-tx-hashing
                   path: wallet
                   sparse-checkout: core/tx-hashing/vectors
                   persist-credentials: false
@@ -96,9 +94,8 @@ jobs:
             - name: Checkout the wallet branch
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
-                  repository: nicky2pc/canton-tx-hashing
-                  ref: pr/core-tx-hashing
-                  ssh-key: ${{ secrets.WALLET_DEPLOY_KEY }}
+                  repository: FTP-Tech-LLC/wallet
+                  ref: feat/core-tx-hashing
                   path: wallet
                   sparse-checkout: |
                       core/ledger-proto
