@@ -44,7 +44,7 @@ What the capture shows:
 
 ## `pre-1970/`
 
-Four prepare responses whose minimum ledger effective time is 1960-01-01T00:00:00Z. No accepted vector of the corpus can hold such a time ([VECTORS.md](../VECTORS.md#hashed-by-the-package-and-the-participant-not-by-python)).
+Four prepare responses whose minimum ledger effective time is 1960-01-01T00:00:00Z. No accepted vector of the corpus can hold such a time ([VECTORS.md](../VECTORS.md#where-the-package-differs)).
 
 - `generate-vectors.ts --only ledger-time-bounds-pre-1970 --execute` made them.
 - It ran with the package that has the pre-1970 fix and this repository at `9d78db0`, plus the one scenario of `scenario.diff`. It runs the choice of `ledger-time-bounds` with a lower bound before 1970.

@@ -4,10 +4,12 @@ The hash vectors of `@canton-network/core-tx-hashing` live in the wallet reposit
 
 This repository checks the same vectors against two implementations that share no hashing code with the package. It also holds the tools that captured the vectors from a Canton participant.
 
-| Script                    | Hashes with                                                                       | Vectors                                |
-| ------------------------- | --------------------------------------------------------------------------------- | -------------------------------------- |
-| `python/check_vectors.py` | the Python hashing examples of Canton v3.5.1, unmodified                          | `v2/`, `v3/`, `mutation/`, `held-out/` |
-| `ts/check-visualizer.ts`  | `hashPreparedTransaction` of `@canton-network/core-tx-visualizer` 1.9.1 (V2 only) | the V2 vectors of these folders        |
+| Script                    | Hashes with                                                                       | Vectors                                              |
+| ------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `python/check_vectors.py` | the Python hashing examples of Canton v3.5.1, unmodified                          | `v2/`, `v3/`, `mutation/`, `held-out/`               |
+| `ts/check-visualizer.ts`  | `hashPreparedTransaction` of `@canton-network/core-tx-visualizer` 1.9.1 (V2 only) | the V2 vectors of `v2/`, `mutation/` and `held-out/` |
+
+The visualizer decodes with `@canton-network/core-ledger-proto`, as the package does, so it checks the V2 hashing, not the decoding.
 
 These are the two references that Canton Dev Fund proposal [canton-foundation/canton-dev-fund#617](https://github.com/canton-foundation/canton-dev-fund/pull/617) names. Both scripts also run on [`captures/canton-3.6.4-pv36/`](captures/README.md), the corpus captured again on Canton 3.6.4 with protocol version 36.
 
@@ -45,9 +47,9 @@ cd canton-tx-hashing-conformance
 
     The last line is `visualizer 1.9.1: accepted 24/24, mutation 7/7, held-out 0/0`. The held-out vectors are all V3.
 
-On the Canton 3.6.4 capture, `captures/canton-3.6.4-pv36` (`../captures/canton-3.6.4-pv36` from `ts/`), both scripts print the same lines. A script that finds a mismatch prints the vector with both hashes and exits non-zero.
+For the Canton 3.6.4 capture, run `python -I python/check_vectors.py captures/canton-3.6.4-pv36` and, in `ts/`, `node check-visualizer.ts ../captures/canton-3.6.4-pv36`. They print the same lines. A script that finds a mismatch prints the vector's id with both hashes and exits non-zero.
 
-`fetch_reference.sh` downloads the Python example and its `.proto` files from `digital-asset/canton` at `v3.5.1` (commit `8d252e65`) and checks each file against a pinned sha256. `ts/package-lock.json` locks the visualizer and the `core-ledger-proto` 1.9.1 released with it.
+`fetch_reference.sh` downloads the Python example and its `.proto` files from `digital-asset/canton` at `v3.5.1` (commit `8d252e65`), and `google/rpc/status.proto` from `googleapis/googleapis`, and checks each file against a pinned sha256. `ts/package-lock.json` locks the visualizer and the `core-ledger-proto` 1.9.1 released with it.
 
 ## CI
 

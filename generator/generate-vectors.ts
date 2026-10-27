@@ -18,8 +18,8 @@
  * participant is connected to more than one.
  *
  * The vectors are those of ../wallet/core/tx-hashing/vectors/. VECTORS.md of
- * this repository describes the scenarios, and its README.md says how to run
- * this.
+ * this repository describes the scenarios, and generator/README.md says how to
+ * run this.
  */
 
 import { existsSync } from 'node:fs'

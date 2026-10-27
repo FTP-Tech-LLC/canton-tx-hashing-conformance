@@ -1,6 +1,6 @@
 # Generator
 
-The tools that made the vectors in `core/tx-hashing/vectors/` of the wallet repository, and the Daml package of their scenarios in `daml/`. They run the package's source from `../../wallet/core/tx-hashing/src` and write only into `../../wallet/core/tx-hashing/vectors/`.
+The tools that made the vectors in `core/tx-hashing/vectors/` of the wallet repository, and the Daml package of their scenarios in `daml/`. They run the package's source from `../../wallet/core/tx-hashing/src` and write only into `../../wallet/core/tx-hashing/vectors/`, with the wallet cloned next to this repository as in [Running the checks](../README.md#running-the-checks).
 
 ## Mutation and reject vectors
 
@@ -32,7 +32,7 @@ A run writes nothing if a mutation vector is refused or keeps the hash of its ac
     pnpm script:fetch:canton --network=mainnet
     ```
 
-    `pnpm generate:all` installs `dpm`, the Daml package manager, and downloads the Splice LocalNet, about 800 MB. It took 5-7 minutes.
+    `pnpm generate:all` installs `dpm`, the Daml package manager, and downloads the Splice LocalNet, about 800 MB. It took 5-7 minutes in the two capture runs.
 
 2. In terminal 1, start the mock OAuth2 server and Canton:
 
@@ -60,7 +60,7 @@ A run writes nothing if a mutation vector is refused or keeps the hash of its ac
     held-out: 12 written, mismatches: 0, executed: 12 ok, refused as expected: 0
     ```
 
-4. The new files differ from the committed ones, as every run makes new parties, contracts and times. The result is `mismatches: 0` and the executions. To go back to the committed vectors:
+4. The new files differ from the committed ones, as every run makes new parties, contracts and times. So check `mismatches: 0` and the execution counts, not the files. To go back to the committed vectors:
 
     ```sh
     git -C ../../wallet checkout -- core/tx-hashing/vectors

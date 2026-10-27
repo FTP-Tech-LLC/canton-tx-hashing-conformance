@@ -29,39 +29,39 @@ The scenarios use the `hash-vectors` DAR of `generator/daml/`, built with Daml S
 - The transactions act as one external party, except `create-multi-signatory` (two parties) and `input-contracts-disclosed` (the second party).
 - In the last column, the children of a node follow it in brackets.
 
-| Scenario                    | V2  | Transaction                                                                                                    |
-| --------------------------- | --- | -------------------------------------------------------------------------------------------------------------- |
-| `create-plain`              | yes | Create `Plain`, a record of one party                                                                          |
-| `create-all-values`         | yes | Create `AllKinds`, with one field of each of the 16 value types                                                |
-| `create-unicode-text`       | yes | Create `Texts`: two- to four-byte UTF-8, combining and zero width characters, Hebrew, U+FEFF, U+FFFF, map keys |
-| `create-multi-signatory`    | yes | Create `Joint` with two signatories, who both act and both sign                                                |
-| `create-empty-collections`  | yes | Create `Empties`: empty list, text map, gen map and text, None, a list that holds an empty list                |
-| `create-and-exercise`       | yes | Two roots: Create `Plain` and the non-consuming Exercise `Check` on it. Prepared, not executed                 |
-| `exercise-consuming`        | yes | Consuming Exercise `Plain.Replace` [Create `Plain`]                                                            |
-| `exercise-nonconsuming`     | yes | Non-consuming Exercise `Plain.Check`, which returns a Bool                                                     |
-| `exercise-archive`          | yes | Consuming Exercise `Archive` on a `Plain`                                                                      |
-| `exercise-nested-creates`   | yes | Exercise `Driver.NestedCreates` [Create, Exercise [Create, Exercise [Create]]]                                 |
-| `exercise-deep-nesting`     | yes | Exercise `Driver.DeepNesting` [Exercise [Exercise [Exercise `Driver.MakePlain` [Create]]]]                     |
-| `exercise-choice-observers` | yes | Exercise `Plain.Announce` with a choice observer                                                               |
-| `exercise-interface`        | yes | Exercise `Poke` on a `Plain` through the interface `Asset`                                                     |
-| `exercise-result-record`    | yes | Exercise `Plain.Describe`, which returns a record                                                              |
-| `fetch-in-choice`           | yes | Exercise `Driver.FetchPlain` [Fetch `Plain`]                                                                   |
-| `fetch-interface`           | yes | Exercise `Driver.FetchAsset` [Fetch `Plain` through `Asset`]                                                   |
-| `numeric-scales`            | yes | Create `Numerics`: scales 0, 10 and 37, up to 38 digits, negative and zero                                     |
-| `time-bounds`               | yes | Create `Times`: the first and last timestamp and date, the epoch, and the microsecond and day before it        |
-| `optional-nested`           | yes | Create `Optionals`: None, Some, Some None, nested optionals, Some of a record, a trailing None                 |
-| `maps`                      | yes | Create `Maps`: text maps, a text map of text maps, gen maps with Int keys and with record keys                 |
-| `variant-enum`              | yes | Create `Variants`: variants of a value and of fields, enums, `Either`                                          |
-| `input-contracts-disclosed` | yes | Exercise `Shared.Use` by a party that sees the contract only as a disclosed contract                           |
-| `ledger-time-bounds`        | yes | Exercise `Driver.CheckTime`, with the minimum and maximum ledger effective time in the metadata                |
-| `rollback`                  | yes | Exercise `Driver.TryCatch` [Rollback [Fetch `Driver`, Exercise `Driver.Noop`]]                                 |
-| `create-with-key`           | no  | Create `Keyed` with a key                                                                                      |
-| `exercise-by-key`           | no  | Exercise `Driver.ArchiveByKey` [consuming Exercise `Archive` on `Keyed`, by key]                               |
-| `fetch-by-key`              | no  | Exercise `Driver.FetchKeyed` [Fetch `Keyed`, by key]                                                           |
-| `lookup-by-key-found`       | no  | Exercise `Driver.LookupKeyed` [QueryByKey, not exhaustive, with the contract it found]                         |
-| `lookup-by-key-empty`       | no  | Exercise `Driver.LookupKeyed` [QueryByKey, exhaustive, without a contract]                                     |
-| `max-record-time`           | no  | Create `Plain`, with `maxRecordTime` in the metadata                                                           |
-| `int64-big`                 | no  | Create `Ints`: 2^53 + 1, -(2^53 + 1), and the largest and the smallest int64                                   |
+| Scenario                    | V2  | Transaction                                                                                                                                      |
+| --------------------------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `create-plain`              | yes | Create `Plain`, a record of one party                                                                                                            |
+| `create-all-values`         | yes | Create `AllKinds`, with one field of each of the 16 value types                                                                                  |
+| `create-unicode-text`       | yes | Create `Texts`: two- to four-byte UTF-8, combining and zero width characters, Hebrew, U+FEFF, U+FFFF, and text map keys z, é, U+FF5E and U+1F600 |
+| `create-multi-signatory`    | yes | Create `Joint` with two signatories, who both act and both sign                                                                                  |
+| `create-empty-collections`  | yes | Create `Empties`: empty list, text map, gen map and text, None, a list that holds an empty list                                                  |
+| `create-and-exercise`       | yes | Two roots: Create `Plain` and the non-consuming Exercise `Check` on it. Prepared, not executed                                                   |
+| `exercise-consuming`        | yes | Consuming Exercise `Plain.Replace` [Create `Plain`]                                                                                              |
+| `exercise-nonconsuming`     | yes | Non-consuming Exercise `Plain.Check`, which returns a Bool                                                                                       |
+| `exercise-archive`          | yes | Consuming Exercise `Archive` on a `Plain`                                                                                                        |
+| `exercise-nested-creates`   | yes | Exercise `Driver.NestedCreates` [Create, Exercise [Create, Exercise [Create]]]                                                                   |
+| `exercise-deep-nesting`     | yes | Exercise `Driver.DeepNesting` [Exercise [Exercise [Exercise `Driver.MakePlain` [Create]]]]                                                       |
+| `exercise-choice-observers` | yes | Exercise `Plain.Announce` with a choice observer                                                                                                 |
+| `exercise-interface`        | yes | Exercise `Poke` on a `Plain` through the interface `Asset`                                                                                       |
+| `exercise-result-record`    | yes | Exercise `Plain.Describe`, which returns a record                                                                                                |
+| `fetch-in-choice`           | yes | Exercise `Driver.FetchPlain` [Fetch `Plain`]                                                                                                     |
+| `fetch-interface`           | yes | Exercise `Driver.FetchAsset` [Fetch `Plain` through `Asset`]                                                                                     |
+| `numeric-scales`            | yes | Create `Numerics`: scales 0, 10 and 37, up to 38 digits, negative and zero                                                                       |
+| `time-bounds`               | yes | Create `Times`: the first and last timestamp and date, the epoch, and the microsecond and day before it                                          |
+| `optional-nested`           | yes | Create `Optionals`: None, Some, Some None, nested optionals, Some of a record, a trailing None                                                   |
+| `maps`                      | yes | Create `Maps`: text maps, a text map of text maps, gen maps with Int keys and with record keys                                                   |
+| `variant-enum`              | yes | Create `Variants`: variants of a value and of fields, enums, `Either`                                                                            |
+| `input-contracts-disclosed` | yes | Exercise `Shared.Use` by a party that sees the contract only as a disclosed contract                                                             |
+| `ledger-time-bounds`        | yes | Exercise `Driver.CheckTime`, with the minimum and maximum ledger effective time in the metadata                                                  |
+| `rollback`                  | yes | Exercise `Driver.TryCatch` [Rollback [Fetch `Driver`, Exercise `Driver.Noop`]]                                                                   |
+| `create-with-key`           | no  | Create `Keyed` with a key                                                                                                                        |
+| `exercise-by-key`           | no  | Exercise `Driver.ArchiveByKey` [consuming Exercise `Archive` on `Keyed`, by key]                                                                 |
+| `fetch-by-key`              | no  | Exercise `Driver.FetchKeyed` [Fetch `Keyed`, by key]                                                                                             |
+| `lookup-by-key-found`       | no  | Exercise `Driver.LookupKeyed` [QueryByKey, not exhaustive, with the contract it found]                                                           |
+| `lookup-by-key-empty`       | no  | Exercise `Driver.LookupKeyed` [QueryByKey, exhaustive, without a contract]                                                                       |
+| `max-record-time`           | no  | Create `Plain`, with `maxRecordTime` in the metadata                                                                                             |
+| `int64-big`                 | no  | Create `Ints`: 2^53 + 1, -(2^53 + 1), and the largest and the smallest int64                                                                     |
 
 Keys and `maxRecordTime` are V3 only, as V2 does not hash them.
 
@@ -161,7 +161,7 @@ A vector expects the first problem that the package finds, in this order:
 6. each node depth first, before its children: its version, LF version and keys, then its fields in hash order, values against `maxValueDepth`;
 7. the LF version of the transaction, then the fields of the metadata, under V2 `maxRecordTime` first.
 
-Some vectors break a second rule too, so an implementation that checks in another order can give another code.
+`reject-v2-own-child`, `reject-v3-two-node-cycle`, `reject-v2-party-in-unknown-value-member`, `reject-v2-key`, `reject-v2-by-key`, `reject-v2-query-by-key` and `reject-v3-empty` break a second rule too, so an implementation that checks in another order can give another code for them.
 
 ## Where the package differs
 
@@ -169,7 +169,7 @@ A participant hashes with Scala, and Canton ships the Python example next to it.
 
 - For each accepted vector, Python and the package give the participant's hash.
 - For what a participant writes, the three agree, except on a metadata time before 1970, which Python cannot hash.
-- They differ on input that a participant does not write, and that is where the reject vectors are.
+- They can differ on input that a participant does not write. The reject vectors hold such input; the mutation vectors change only fields that both hash alike.
 
 An empty Participant cell means this file does not cover that case. The newest LF version a scheme hashes is `2.1` for V2 and `2` for V3. The decoder of Canton 3.5 knows `2.1`, `2` and `dev`, and that of 3.6 also `3`.
 
@@ -204,13 +204,13 @@ An empty Participant cell means this file does not cover that case. The newest L
 The package decodes with protobuf-ts, the Python example with upb:
 
 - A malformed encoding, such as a field length one byte short, is a decode error in Python. protobuf-ts can decode it, and the package hashes the message it decoded.
-- A known field written with another wire type is skipped as unknown by Python and by the participant. protobuf-ts reads it as that field.
+- A known field written with another wire type is skipped as unknown by Python and by Canton's own decoder and hasher (canton-open-source 3.5.18, run offline). protobuf-ts reads it as that field.
 
 The reject vectors use neither kind of encoding, so a strict decoder passes the corpus.
 
 ### Normal forms
 
-The participant's hasher hashes the inputs below in a normal form. The package hashes them as written, as the Python example does:
+The participant's hasher hashes the inputs below in a normal form. The package hashes them as written, as the Python example does, which cannot hash the bound of 0001-01-01, a time before 1970:
 
 - a `minLedgerEffectiveTime` of 0001-01-01T00:00:00Z or a `maxLedgerEffectiveTime` of 9999-12-31T23:59:59.999999Z, which the participant reads as no bound;
 - an empty record label, which it reads as no label;
@@ -231,19 +231,20 @@ The accepted and held-out vectors show this:
 - A node on a contract with a key carries the key also when the contract is used by id, with `byKey = false`.
 - `metadata.maxRecordTime` is set when the prepare request sets it, under V2 too.
 - `isLedgerTimeGE t` sets `minLedgerEffectiveTime` to `t`, and `isLedgerTimeLT t` sets `maxLedgerEffectiveTime` to one microsecond before `t`.
-- A numeric has as many decimals as its scale, the entries of a text map are in the code point order of their keys, and the trailing None fields of a record are left out. An implementation that sorts again or fills in fields gets another hash.
+- A numeric has as many decimals as its scale, the entries of a text map are in the code point order of their keys, and the trailing None fields of a record are left out. An implementation that sorts the entries again in another order, such as by UTF-16 code units, or fills in fields gets another hash.
 - Every input contract has an `eventBlob`, and `metadata.globalKeyMapping` is empty.
-- A prepare request takes one command. A `CreateAndExercise` command makes a transaction with two roots, which the participant prepares and hashes but does not execute.
+- With `enforceSingleRootNode` at its default, as in the wallet's local setup, a prepare request takes one command, and a `CreateAndExercise` command makes a transaction with two roots, which the participant prepares and hashes but does not execute.
 - While the scenarios were built, Canton 3.5.10 refused to roll back a create or a consuming exercise (`DAML_EFFECTFUL_ROLLBACK_ERROR`), so the rollback in `rollback` holds a Fetch and a non-consuming Exercise.
 
 ## Sources
 
 Cited from `digital-asset/canton` at [`v3.5.1`](https://github.com/digital-asset/canton/tree/v3.5.1), and at [`v3.6.4`](https://github.com/digital-asset/canton/tree/v3.6.4) where a line says so.
 
-The released 3.5.10 does the same as `v3.5.1` in the cited code, with some lines shifted.
+The `v3.5.x` tags are commits of Canton's main branch. The released 3.5.10 matches `release-line-3.5`, where the cited code does the same as at `v3.5.1`, with some lines shifted.
 
 - The Python files are in `community/app/src/pack/examples/08-interactive-submission/`: `daml_transaction_hashing_common.py` (`common.py`), `daml_transaction_hashing_v2.py` (`v2.py`) and `daml_transaction_hashing_v3.py` (`v3.py`).
 - The Scala files are under `community/`: the hasher in `base/src/main/scala/com/digitalasset/canton/protocol/hash/`, the decoder (`PreparedTransactionDecoder.scala`) and encoder (`PreparedTransactionEncoder.scala`) in `ledger/ledger-api-core/src/main/scala/com/digitalasset/canton/platform/apiserver/services/command/interactive/codec/`, and Daml-LF in `daml-lf/`.
+- Elsewhere under `community/`: `common/src/main/scala/com/digitalasset/canton/protocol/WellFormedTransaction.scala`; in `base/src/main/scala/com/digitalasset/canton/` the files `util/LfTransactionUtil.scala`, `crypto/HashBuilder.scala`, `crypto/InteractiveSubmission.scala`, `serialization/ProtoConverter.scala`, `data/LedgerTimeBoundaries.scala`, `topology/Member.scala` and `version/ProtocolVersion.scala`; in `ledger/ledger-api-core/src/main/scala/com/digitalasset/canton/` the files `ledger/api/validation/ValueValidator.scala` and `ledger/api/util/LfEngineToApi.scala`; and `InteractiveSubmissionServiceImpl.scala` one level above `codec/`. `Hash.scala` is the Daml-LF one, in `daml-lf/transaction/`.
 
 By topic:
 

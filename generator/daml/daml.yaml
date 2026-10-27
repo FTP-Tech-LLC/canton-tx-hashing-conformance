@@ -9,7 +9,7 @@ build-options:
     - --target=2.3
     # damlc refuses an interface and a template that implements it in one
     # package, which then cannot be upgraded: a participant that has one
-    # version of this package refuses a later one (../../README.md).
+    # version of this package refuses a later one (../README.md).
     - -Wno-upgrade-interfaces
     # Exceptions are deprecated, but try and catch make the rollback node.
     - -Wno-deprecated-exceptions
