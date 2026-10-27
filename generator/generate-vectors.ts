@@ -32,9 +32,9 @@ import {
     computePreparedTransactionHash,
     TxHashingError,
 } from '../../wallet/core/tx-hashing/src/index.js'
-import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/hex.js'
-import { int64sBeyond2To53 } from '../../wallet/core/tx-hashing/src/__tests__/int64.js'
-import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/load-vectors.js'
+import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/helpers/hex.js'
+import { int64sBeyond2To53 } from '../../wallet/core/tx-hashing/src/__tests__/helpers/int64.js'
+import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/helpers/load-vectors.js'
 import {
     cantonVersion,
     connect,

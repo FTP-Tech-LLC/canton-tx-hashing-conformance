@@ -19,6 +19,6 @@
     },
     "include": [
         "*.ts",
-        "../../wallet/core/tx-hashing/src/__tests__/vite-env.d.ts"
+        "../../wallet/core/tx-hashing/src/__tests__/helpers/vite-env.d.ts"
     ]
 }

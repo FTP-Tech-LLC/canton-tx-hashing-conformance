@@ -29,13 +29,13 @@ import {
     type TraversalLimits,
     type TxHashingErrorCode,
 } from '../../wallet/core/tx-hashing/src/index.js'
-import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/hex.js'
-import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/load-vectors.js'
+import { toHex } from '../../wallet/core/tx-hashing/src/__tests__/helpers/hex.js'
+import type { Vector } from '../../wallet/core/tx-hashing/src/__tests__/helpers/load-vectors.js'
 import {
     changedBytes,
     changedText,
     changedTime,
-} from '../../wallet/core/tx-hashing/src/__tests__/one-byte.js'
+} from '../../wallet/core/tx-hashing/src/__tests__/helpers/one-byte.js'
 
 const VECTORS = path.join(
     import.meta.dirname,
